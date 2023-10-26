@@ -27,12 +27,32 @@ and the respective object and resource ID, binned to 10 minutes.
 ## Model definition rules
 
 - **device models** are identified using a model name, for example `PCA20064`
-- **LwM2M objects** are defined in the ID range from `14200` to `15000`
-  (non-inclusively). The URN must have the prefix `urn:oma:lwm2m:x:`
+
+The conformity to the rules is checked using the script
+[`./check-model-rules.ts`](./map-protocol.ts).
+
+## LwM2M rules
+
+- LwM2M objects are defined in the ID range from `14200` to `15000`
+  (non-inclusively).
+- The URN must have the prefix `urn:oma:lwm2m:x:`.
+- The object version must be appended if it is not `1.0`
 - All objects must define one timestamp property.
 
 The conformity to the rules is checked using the script
-[`./map-protocols.ts`](./map-protocol.ts).
+[`./check-lwm2m-rules.ts`](./map-protocol.ts).
+
+## SenML rules
+
+- Use the object ID as the **base name** `bn`, `urn:oma:lwm2m:x:` must be
+  omitted.
+- `bn` and `n` are joined using `:`, therefore `bn` should only contain the
+  object ID
+- Use the custom property `blv` to specify the object version, `1.0` is the
+  default and should not be specified.
+- Timestamps are to be expressed in the **base time** property `bt` and are
+  mapped to the LwM2M object's timestamp property and must not be send as a
+  property.
 
 ## Data rules
 

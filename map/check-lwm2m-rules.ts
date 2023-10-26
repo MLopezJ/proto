@@ -39,7 +39,7 @@ const listLwm2mDefinitions = async (
 					process.cwd(),
 					'map',
 					'lwm2m',
-					'LWM2M.xsd',
+					'LWM2M-v1_1.xsd',
 				)} ${objectDefinitionFile}`,
 				(error, _, stderr) => {
 					if (error) {
@@ -143,12 +143,8 @@ const listLwm2mDefinitions = async (
 	return defs
 }
 
-console.log(`hello.nrfcloud.com/map protocol definitions`)
-
-console.log('')
-
 // LwM2M
-console.log(chalk.gray('LwM2M object definitions'))
+console.log(chalk.gray('LwM2M rules check'))
 console.log('')
 const lwm2mDir = path.join(process.cwd(), 'map', 'lwm2m')
 const lwm2mDefinitions = await listLwm2mDefinitions(lwm2mDir)
@@ -157,20 +153,3 @@ assert.equal(
 	true,
 	'LwM2M objects must be defined.',
 )
-
-console.log('')
-
-// Models
-console.log(chalk.gray('Models'))
-console.log('')
-const modelsDir = path.join(process.cwd(), 'map', 'model')
-for (const model of await readdir(modelsDir)) {
-	if (!(await stat(path.join(modelsDir, model))).isDirectory()) continue
-	console.log(chalk.white('·'), chalk.white.bold(model))
-	assert.match(
-		model,
-		/^[a-z0-9]+$/i,
-		'Model identifiers must consist of numbers and letters only',
-	)
-	console.log(chalk.green('✔'), chalk.gray('Model name is correct'))
-}

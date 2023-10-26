@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <LWM2M
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.openmobilealliance.org/tech/profiles/LWM2M.xsd">
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://openmobilealliance.org/tech/profiles/LWM2M-v1_1.xsd">
 	<Object ObjectType="MODefinition">
 		<Name>Geolocation</Name>
 		<Description1>
@@ -8,8 +8,8 @@
 		</Description1>
 		<ObjectID>14201</ObjectID>
 		<ObjectURN>urn:oma:lwm2m:x:14201</ObjectURN>
-		<LWM2MVersion>1.2</LWM2MVersion>
-		<ObjectVersion>1.0</ObjectVersion>
+		<LWM2MVersion>1.1</LWM2MVersion>
+		<ObjectVersion>1.1</ObjectVersion>
 		<MultipleInstances>Single</MultipleInstances>
 		<Mandatory>Optional</Mandatory>
 		<Resources>

@@ -10,7 +10,7 @@ describe('unwrapNestedArray()', () => {
 					$: {
 						'xmlns:xsi': 'http://www.w3.org/2001/XMLSchema-instance',
 						'xsi:noNamespaceSchemaLocation':
-							'http://www.openmobilealliance.org/tech/profiles/LWM2M.xsd',
+							'http://www.openmobilealliance.org/tech/profiles/LWM2M-v1_1.xsd',
 					},
 					Object: [
 						{
@@ -132,7 +132,7 @@ describe('unwrapNestedArray()', () => {
 					$: {
 						'xmlns:xsi': 'http://www.w3.org/2001/XMLSchema-instance',
 						'xsi:noNamespaceSchemaLocation':
-							'http://www.openmobilealliance.org/tech/profiles/LWM2M.xsd',
+							'http://www.openmobilealliance.org/tech/profiles/LWM2M-v1_1.xsd',
 					},
 					Object: {
 						$: { ObjectType: 'MODefinition' },

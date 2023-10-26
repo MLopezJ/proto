@@ -1,19 +1,30 @@
 import { Type, type Static } from '@sinclair/typebox'
 
-const Name = Type.String({ minLength: 1, title: 'Name' })
-const BaseName = Type.String({ minLength: 1, title: 'Base Name' })
+const Name = Type.RegExp(/^[0-9]+$/, { title: 'Name' })
+const BaseName = Type.RegExp(/^142[0-9]{2}$/, { title: 'Base Name' })
 const BaseValue = Type.Number({ title: 'Base Value' })
 const Value = Type.Number({ title: 'Value' })
+const Time = Type.Integer({ minimum: 0, title: 'Time' })
 
 /**
- * Defines a SenML type with some unsupported elements removed: Sum, Base Sum, Update Time, Time, Base Time
- *
- * Time fields are removed because they have to be explicitly defined as a value field.
+ * Defines a SenML type with some unsupported elements removed: Sum, Base Sum, Update Time
  *
  * @see https://datatracker.ietf.org/doc/html/rfc8428
  */
 const Measurement = Type.Intersect(
 	[
+		Type.Object({
+			blv: Type.Optional(
+				Type.String({
+					minLength: 1,
+					description: 'The LwM2M object version used',
+				}),
+			),
+		}),
+		// Base time
+		Type.Object({
+			bt: Type.Optional(Time),
+		}),
 		// Name combinations
 		Type.Union([
 			Type.Object({
