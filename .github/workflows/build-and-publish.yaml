@@ -51,6 +51,11 @@ jobs:
       - name: Install dependencies
         run: npm ci --no-audit
 
+      - name: Check model data
+        run: |
+          npx tsx map/check-model-rules.ts
+          npx tsx map/check-lwm2m-rules.ts
+
       - name: Run tests
         run: npm test
 

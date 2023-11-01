@@ -1,7 +1,7 @@
 import { Type, type Static } from '@sinclair/typebox'
 
-const Name = Type.RegExp(/^[0-9]+$/, { title: 'Name' })
-const BaseName = Type.RegExp(/^142[0-9]{2}$/, { title: 'Base Name' })
+const ResourceID = Type.Integer({ minimum: 0, title: 'ResourceID' })
+const ObjectID = Type.Integer({ minimum: 0, title: 'ObjectID' })
 const BaseValue = Type.Number({ title: 'Base Value' })
 const Value = Type.Number({ title: 'Value' })
 const Time = Type.Integer({ minimum: 0, title: 'Time' })
@@ -11,42 +11,36 @@ const Time = Type.Integer({ minimum: 0, title: 'Time' })
  *
  * @see https://datatracker.ietf.org/doc/html/rfc8428
  */
-const Measurement = Type.Intersect(
+export const Measurement = Type.Intersect(
 	[
-		Type.Object({
-			blv: Type.Optional(
-				Type.String({
+		Type.Union([
+			Type.Object({
+				n: ResourceID,
+			}),
+			Type.Object({
+				bn: ObjectID,
+				blv: Type.String({
 					minLength: 1,
 					description: 'The LwM2M object version used',
 				}),
-			),
-		}),
-		// Base time
-		Type.Object({
-			bt: Type.Optional(Time),
-		}),
-		// Name combinations
-		Type.Union([
-			Type.Object({
-				n: Name,
-			}),
-			Type.Object({
-				bn: Type.Optional(BaseName),
-				n: Name,
-			}),
-			Type.Object({
-				bn: BaseName,
+				bt: Type.Optional(Time),
+				n: ResourceID,
 			}),
 		]),
 		// Value combinations
 		Type.Union([
-			Type.Object({
-				bv: BaseValue,
-			}),
-			Type.Object({
-				bv: Type.Optional(BaseValue),
-				v: Value,
-			}),
+			Type.Union([
+				Type.Object({
+					bv: BaseValue,
+				}),
+				Type.Object({
+					bv: BaseValue,
+					v: Value,
+				}),
+				Type.Object({
+					v: Value,
+				}),
+			]),
 			Type.Object({
 				vs: Type.String({ minLength: 1, title: 'String Value' }),
 			}),
@@ -71,3 +65,4 @@ const Measurement = Type.Intersect(
 export const SenML = Type.Array(Measurement, { minItems: 1 })
 
 export type SenMLType = Static<typeof SenML>
+export type MeasurementType = Static<typeof Measurement>

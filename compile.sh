@@ -11,3 +11,5 @@ npx swc -C jsc.experimental.keepImportAttributes=true -C jsc.experimental.emitAs
 cp -r ./schemas ./dist
 mkdir ./dist/nrfcloud-application-protocols
 cp -r ./nrfcloud-application-protocols/schemas ./dist/nrfcloud-application-protocols
+
+npx tsx ./map/generate.ts

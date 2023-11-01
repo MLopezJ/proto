@@ -48,6 +48,8 @@ The conformity to the rules is checked using the script
   omitted.
 - `bn` and `n` are joined using `:`, therefore `bn` should only contain the
   object ID
+- The LwM2M object ID in `bn` and the resource ID in `n` are expressed as a
+  number.
 - Use the custom property `blv` to specify the object version, `1.0` is the
   default and should not be specified.
 - Timestamps are to be expressed in the **base time** property `bt` and are

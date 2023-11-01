@@ -1,6 +1,5 @@
 import chalk from 'chalk'
 import jsonata from 'jsonata'
-import { AssertionError } from 'node:assert'
 import assert from 'node:assert/strict'
 import { readFile, readdir, stat } from 'node:fs/promises'
 import path from 'node:path'
