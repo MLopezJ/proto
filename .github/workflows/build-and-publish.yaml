@@ -53,6 +53,7 @@ jobs:
 
       - name: Check model data
         run: |
+          sudo apt-get install -y libxml2-utils
           npx tsx map/check-model-rules.ts
           npx tsx map/check-lwm2m-rules.ts
 
