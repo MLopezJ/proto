@@ -3,7 +3,7 @@
  */
 
 import chalk from 'chalk'
-import { readFile, readdir, writeFile } from 'node:fs/promises'
+import { mkdir, readFile, readdir, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 import { unwrapNestedArray } from './lwm2m/unwrapNestedArray.js'
 import xml2js from 'xml2js'
@@ -41,12 +41,18 @@ for (const objectDefinitionFile of (
 		`${chalk.white(ObjectID)}${chalk.gray('.')}${chalk.white(ResourceId)}`,
 	)
 }
+try {
+	await mkdir(path.join(process.cwd(), 'map', 'generated'))
+} catch {
+	// pass
+}
 const lwm2mTimestampResourcesFile = path.join(
 	process.cwd(),
 	'map',
 	'generated',
 	'lwm2mTimestampResources.ts',
 )
+console.log(chalk.green('Writing'), chalk.blue(lwm2mTimestampResourcesFile))
 await writeFile(
 	lwm2mTimestampResourcesFile,
 	generateLwm2mTimestampResources(lwm2mTimestampResources)
@@ -54,5 +60,3 @@ await writeFile(
 		.join(os.EOL),
 	'utf-8',
 )
-
-console.log('  ', chalk.green('✔'), chalk.gray(`map written`))

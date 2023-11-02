@@ -44,5 +44,6 @@ npm test
 ```bash
 npx tsx generate/types/schema-to-type.ts
 npx tsx generate/schema/NRFCloudMessage.schema.ts
+npx tsx map/generate.ts
 npx prettier --write .
 ```
