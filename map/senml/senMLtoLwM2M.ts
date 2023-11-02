@@ -1,5 +1,5 @@
 import type { MeasurementType, SenMLType } from './SenMLSchema'
-import { lwm2mTimestampResources } from 'map/generated/lwm2mTimestampResources'
+import { lwm2mTimestampResources } from '../generated/lwm2mTimestampResources.js'
 
 type LwM2MObject = {
 	ObjectID: number

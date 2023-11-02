@@ -27,6 +27,10 @@ and the respective object and resource ID, binned to 10 minutes.
 ## Model definition rules
 
 - **device models** are identified using a model name, for example `PCA20064`
+- a [`README.md`](./model/PCA20035+solar/README.md) must be provided that
+  describes the model
+- the front-matter in the `README.md` must follow
+  [the `ModelInfo` schema defined in `./model/model.ts`](./model/model.ts)
 
 The conformity to the rules is checked using the script
 [`./check-model-rules.ts`](./map-protocol.ts).
