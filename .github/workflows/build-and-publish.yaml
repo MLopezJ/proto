@@ -51,18 +51,18 @@ jobs:
       - name: Install dependencies
         run: npm ci --no-audit
 
-      - name: Check model data
-        run: |
-          sudo apt-get install -y libxml2-utils
-          npx tsx map/check-model-rules.ts
-          npx tsx map/check-lwm2m-rules.ts
-
       - name: Generate code
         run: |
           npx tsx generate/types/schema-to-type.ts
           npx tsx generate/schema/NRFCloudMessage.schema.ts
           npx tsx map/generate.ts
           npx prettier --write .
+
+      - name: Check model data
+        run: |
+          sudo apt-get install -y libxml2-utils
+          npx tsx map/check-model-rules.ts
+          npx tsx map/check-lwm2m-rules.ts
 
       - name: Run tests
         run: npm test
