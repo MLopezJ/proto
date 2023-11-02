@@ -17,23 +17,28 @@ map to the defined LwM2M objects ([example](./SenMLSchema.spec.ts)).
 Optionally, a set of [JSONata](https://jsonata.org/) expression can be defined
 per model which allow to convert from the JSON data format that is published by
 the devices to the SenML data format required by the data store
-([example mapping](./model/PCA20064/shadow/14201.jsonata),
-[result](./model/PCA20064/shadow/14201.jsonata.result.json) when using
-[this shadow](./model/PCA20064/examples/shadow/example.json)).
+([example mapping](./model/PCA20035+solar/shadow/location.jsonata),
+[result](./model/PCA20035+solar/shadow/location.result.example.json) when using
+[this shadow](./model/PCA20035+solar/shadow/location.input.example.json)).
 
 The data store will expand the SenML payload and store it under the deviceID,
 and the respective object and resource ID, binned to 10 minutes.
 
 ## Model definition rules
 
-- **device models** are identified using a model name, for example `PCA20064`
+- **device models** are identified using a model name, for example
+  `PCA20035+solar`
 - a [`README.md`](./model/PCA20035+solar/README.md) must be provided that
   describes the model
 - the front-matter in the `README.md` must follow
   [the `ModelInfo` schema defined in `./model/model.ts`](./model/model.ts)
+- transforms must define a JSONata expression in a `.jsonata` file that provides
+  a `select` expression and a `result` expression. Only those expressions whose
+  `select` evaluates to boolean `true` will have their `result` used. This
+  simplifies creating valid results.
 
 The conformity to the rules is checked using the script
-[`./check-model-rules.ts`](./map-protocol.ts).
+[`./check-model-rules.ts`](./check-model-rules.ts).
 
 ## LwM2M rules
 
@@ -44,7 +49,7 @@ The conformity to the rules is checked using the script
 - All objects must define one timestamp property.
 
 The conformity to the rules is checked using the script
-[`./check-lwm2m-rules.ts`](./map-protocol.ts).
+[`./check-lwm2m-rules.ts`](./check-lwm2m-rules.ts).
 
 ## SenML rules
 

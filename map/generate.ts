@@ -13,7 +13,7 @@ import { printNode } from './generator/printNode.js'
 import os from 'node:os'
 import { parseMarkdown } from './parseMarkdown.js'
 import { validateWithTypeBox } from '../validator/validateWithTypeBox.js'
-import { ModelInfo } from './model/model.js'
+import { ModelInfoSchema } from './model/model.js'
 import type { Static } from '@sinclair/typebox'
 import { generateModels } from './generator/generateModels.js'
 
@@ -66,11 +66,11 @@ await writeFile(
 
 console.log(chalk.gray('Models'))
 
-const validateModelInfo = validateWithTypeBox(ModelInfo)
+const validateModelInfo = validateWithTypeBox(ModelInfoSchema)
 
-export const loadModelInfo = async (
+const loadModelInfo = async (
 	model: string,
-): Promise<Static<typeof ModelInfo>> => {
+): Promise<Static<typeof ModelInfoSchema>> => {
 	const { data: info } = await parseMarkdown.process(
 		await readFile(subDir('model', model, 'README.md'), 'utf-8'),
 	)
@@ -87,7 +87,25 @@ export const loadModelInfo = async (
 	return maybeModelInfo.value
 }
 
-const modelInfo = await Promise.all(
+// FIXME: use markdown format
+const loadModelTransforms = async (
+	model: string,
+): Promise<{
+	shadow: string[]
+}> => ({
+	shadow: await Promise.all(await readdir(subDir('model', model, 'shadow')))
+		.then((entries) => entries.filter((e) => e.endsWith('.jsonata')))
+		.then(async (expressions) =>
+			Promise.all(
+				expressions.map(async (expression) =>
+					readFile(subDir('model', model, 'shadow', expression), 'utf-8'),
+				),
+			),
+		)
+		.then((jsonata) => jsonata.map((s) => s.replaceAll('\n', ''))),
+})
+
+const models = await Promise.all(
 	(
 		await Promise.all(
 			(await readdir(subDir('model'))).map(async (f) => ({
@@ -97,13 +115,19 @@ const modelInfo = await Promise.all(
 		)
 	)
 		.filter(({ stat }) => stat.isDirectory())
-		.map(async (model) => loadModelInfo(model.name)),
+		.map(async (model) => {
+			console.log(chalk.gray('·'), chalk.white(model.name))
+			return {
+				info: await loadModelInfo(model.name),
+				transforms: await loadModelTransforms(model.name),
+			}
+		}),
 )
 
 const modelsFile = subDir('generated', 'models.ts')
 console.log(chalk.green('Writing'), chalk.blue(modelsFile))
 await writeFile(
 	modelsFile,
-	generateModels(modelInfo).map(printNode).join(os.EOL),
+	generateModels(models).map(printNode).join(os.EOL),
 	'utf-8',
 )

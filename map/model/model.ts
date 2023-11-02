@@ -1,4 +1,4 @@
-import { Type } from '@sinclair/typebox'
+import { Type, type Static } from '@sinclair/typebox'
 
 export const ModelIDRegExp = /^[A-Za-z0-9+]+$/
 export const URLRegExp = /^http?s:\/\/.+/
@@ -9,7 +9,7 @@ const Version = Type.RegExp(/^\d\.\d\.\d/, {
 	examples: ['1.1.2'],
 })
 
-export const ModelInfo = Type.Object(
+export const ModelInfoSchema = Type.Object(
 	{
 		name: Type.RegExp(ModelIDRegExp, {
 			title: 'Name',
@@ -122,3 +122,29 @@ export const ModelInfo = Type.Object(
 		description: 'Describes a model',
 	},
 )
+
+export type ModelInfo = Omit<
+	Static<typeof ModelInfoSchema>,
+	'links' | 'firmware' | 'mfw'
+> & {
+	links: {
+		learnMore: URL
+		documentation: URL
+	}
+	firmware: Omit<Static<typeof ModelInfoSchema>['firmware'], 'link'> & {
+		link: URL
+	}
+	mfw: Omit<Static<typeof ModelInfoSchema>['mfw'], 'link'> & { link: URL }
+}
+
+export type Models = Readonly<
+	Record<
+		string,
+		{
+			info: ModelInfo
+			transforms: {
+				shadow: string[]
+			}
+		}
+	>
+>

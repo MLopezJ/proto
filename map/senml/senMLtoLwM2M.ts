@@ -30,7 +30,9 @@ export const senMLtoLwM2M = (senML: SenMLType): Array<LwM2MObject> => {
 	for (const item of senML) {
 		if (isObjectInfo(item)) {
 			if (currentObject !== undefined) items.push(currentObject)
-			const tsRes = lwm2mTimestampResources[item.bn] as number
+			const tsRes = lwm2mTimestampResources[item.bn]
+			if (tsRes === undefined)
+				throw new Error(`Unknown LwM2M Object ID: ${item.bn}!`)
 			currentObject = {
 				ObjectID: item.bn,
 				ObjectVersion: item.blv,

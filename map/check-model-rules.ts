@@ -3,11 +3,23 @@ import jsonata from 'jsonata'
 import assert from 'node:assert/strict'
 import { readFile, readdir, stat } from 'node:fs/promises'
 import path from 'node:path'
-import { ModelIDRegExp, ModelInfo } from './model/model.js'
+import { ModelIDRegExp, ModelInfoSchema } from './model/model.js'
 import { validateWithTypeBox } from '../validator/validateWithTypeBox.js'
 import { parseMarkdown } from './parseMarkdown.js'
+import { SenML } from './senml/SenMLSchema.js'
+import { senMLtoLwM2M } from './senml/senMLtoLwM2M.js'
+import { Type } from '@sinclair/typebox'
 
-const validateModelInfo = validateWithTypeBox(ModelInfo)
+const validateModelInfo = validateWithTypeBox(ModelInfoSchema)
+const validateSenML = validateWithTypeBox(SenML)
+const validateExpressionSelection = validateWithTypeBox(
+	Type.Object({
+		select: Type.Boolean({
+			title: 'Select',
+			description: 'Whether the result should be used.',
+		}),
+	}),
+)
 
 console.log(chalk.gray('Models rules check'))
 console.log('')
@@ -69,7 +81,7 @@ for (const model of await readdir(modelsDir)) {
 					path.join(
 						modelDir,
 						'shadow',
-						expressionFile.replace(/\.jsonata$/, '.input.json'),
+						expressionFile.replace(/\.jsonata$/, '.input.example.json'),
 					),
 					'utf-8',
 				),
@@ -79,18 +91,34 @@ for (const model of await readdir(modelsDir)) {
 					path.join(
 						modelDir,
 						'shadow',
-						expressionFile.replace(/\.jsonata$/, '.result.json'),
+						expressionFile.replace(/\.jsonata$/, '.result.example.json'),
 					),
 					'utf-8',
 				),
 			)
 			const e = jsonata(expr)
-			assert.deepEqual(await e.evaluate(input), result)
+			const expressionResult = await e.evaluate(input)
+			const maybeValidExpression = validateExpressionSelection(expressionResult)
+			if ('errors' in maybeValidExpression) {
+				console.error(maybeValidExpression.errors)
+				throw new Error(
+					`The JSONata expression must have a boolean 'select' property.`,
+				)
+			}
+
+			const maybeValidSenML = validateSenML(expressionResult.result)
+			if ('errors' in maybeValidSenML) {
+				console.error(maybeValidSenML.errors)
+				throw new Error('The JSONata expression must produce valid SenML')
+			}
+			assert.deepEqual(maybeValidSenML.value, result)
 			console.log(
 				' ',
 				chalk.green('✔'),
-				chalk.gray('JSONata expression is valid'),
+				chalk.gray('Transformation result is valid SenML'),
 			)
+			senMLtoLwM2M(maybeValidSenML.value)
+			// FIXME: validate LwM2M (see #)
 		}
 	}
 }
