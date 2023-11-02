@@ -32,10 +32,14 @@ and the respective object and resource ID, binned to 10 minutes.
   describes the model
 - the front-matter in the `README.md` must follow
   [the `ModelInfo` schema defined in `./model/model.ts`](./model/model.ts)
-- transforms must define a JSONata expression in a `.jsonata` file that provides
-  a `select` expression and a `result` expression. Only those expressions whose
-  `select` evaluates to boolean `true` will have their `result` used. This
-  simplifies creating valid results.
+- transforms may define transforms that convert the data sent by the device
+  using JSONata in one or more Markdown files int the `shadow` folder
+  ([Example](./model/PCA20035+solar/shadow/location.md)):
+  - The `Match Expression` the must evaluate to `true` for the
+    `Transform Expression` to be applied to the input message
+  - an `Input Example` and a `Result Example` must be supplied to validate the
+    expression
+  - The message must be transformed to SenML
 
 The conformity to the rules is checked using the script
 [`./check-model-rules.ts`](./check-model-rules.ts).

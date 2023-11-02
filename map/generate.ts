@@ -16,6 +16,7 @@ import { validateWithTypeBox } from '../validator/validateWithTypeBox.js'
 import { ModelInfoSchema } from './model/model.js'
 import type { Static } from '@sinclair/typebox'
 import { generateModels } from './generator/generateModels.js'
+import { codeBlockFromMarkdown } from './codeBlockFromMarkdown.js'
 
 const subDir = (...tree: string[]): string =>
 	path.join(process.cwd(), 'map', ...tree)
@@ -91,10 +92,13 @@ const loadModelInfo = async (
 const loadModelTransforms = async (
 	model: string,
 ): Promise<{
-	shadow: string[]
+	shadow: {
+		match: string
+		transform: string
+	}[]
 }> => ({
 	shadow: await Promise.all(await readdir(subDir('model', model, 'shadow')))
-		.then((entries) => entries.filter((e) => e.endsWith('.jsonata')))
+		.then((entries) => entries.filter((e) => e.endsWith('.md')))
 		.then(async (expressions) =>
 			Promise.all(
 				expressions.map(async (expression) =>
@@ -102,7 +106,15 @@ const loadModelTransforms = async (
 				),
 			),
 		)
-		.then((jsonata) => jsonata.map((s) => s.replaceAll('\n', ''))),
+		.then((transforms) =>
+			transforms.map((markdown) => {
+				const findBlock = codeBlockFromMarkdown(markdown)
+				return {
+					match: findBlock('jsonata', 'Match Expression'),
+					transform: findBlock('jsonata', 'Transform Expression'),
+				}
+			}),
+		),
 })
 
 const models = await Promise.all(

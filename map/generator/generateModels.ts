@@ -7,7 +7,10 @@ export const generateModels = (
 	models: {
 		info: Static<typeof ModelInfoSchema>
 		transforms: {
-			shadow: string[]
+			shadow: {
+				match: string
+				transform: string
+			}[]
 		}
 	}[],
 ): ts.Node[] => {

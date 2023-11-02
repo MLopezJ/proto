@@ -2,13 +2,13 @@
 
 Creates the location data from the asset_tracker_v2 shadow document.
 
-## Select
+## Match Expression
 
 ```jsonata
 $exists(state.reported.gnss.v.lat)
 ```
 
-## Result
+## Transform Expression
 
 ```jsonata
 [

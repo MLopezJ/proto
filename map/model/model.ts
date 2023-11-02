@@ -143,7 +143,10 @@ export type Models = Readonly<
 		{
 			info: ModelInfo
 			transforms: {
-				shadow: string[]
+				shadow: {
+					match: string
+					transform: string
+				}[]
 			}
 		}
 	>

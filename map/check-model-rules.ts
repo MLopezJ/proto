@@ -8,18 +8,10 @@ import { validateWithTypeBox } from '../validator/validateWithTypeBox.js'
 import { parseMarkdown } from './parseMarkdown.js'
 import { SenML } from './senml/SenMLSchema.js'
 import { senMLtoLwM2M } from './senml/senMLtoLwM2M.js'
-import { Type } from '@sinclair/typebox'
+import { codeBlockFromMarkdown } from './codeBlockFromMarkdown.js'
 
 const validateModelInfo = validateWithTypeBox(ModelInfoSchema)
 const validateSenML = validateWithTypeBox(SenML)
-const validateExpressionSelection = validateWithTypeBox(
-	Type.Object({
-		select: Type.Boolean({
-			title: 'Select',
-			description: 'Whether the result should be used.',
-		}),
-	}),
-)
 
 console.log(chalk.gray('Models rules check'))
 console.log('')
@@ -64,59 +56,59 @@ for (const model of await readdir(modelsDir)) {
 	try {
 		await stat(shadowFolder)
 		hasShadowTransformers = true
+		console.log(' ', chalk.gray('Shadow transformers:'))
 	} catch {
 		console.log(' ', chalk.gray('No transformers found.'))
 	}
 	if (hasShadowTransformers) {
-		for (const expressionFile of (await readdir(shadowFolder)).filter((f) =>
-			f.endsWith('.jsonata'),
+		for (const transformer of (await readdir(shadowFolder)).filter((f) =>
+			f.endsWith('.md'),
 		)) {
-			console.log(' ', chalk.white('·'), chalk.white.bold(expressionFile))
-			const expr = await readFile(
-				path.join(modelDir, 'shadow', expressionFile),
+			console.log(' ', chalk.white('·'), chalk.white.bold(transformer))
+			const markdown = await readFile(
+				path.join(modelDir, 'shadow', transformer),
 				'utf-8',
 			)
-			const input = JSON.parse(
-				await readFile(
-					path.join(
-						modelDir,
-						'shadow',
-						expressionFile.replace(/\.jsonata$/, '.input.example.json'),
-					),
-					'utf-8',
-				),
-			)
-			const result = JSON.parse(
-				await readFile(
-					path.join(
-						modelDir,
-						'shadow',
-						expressionFile.replace(/\.jsonata$/, '.result.example.json'),
-					),
-					'utf-8',
-				),
-			)
-			const e = jsonata(expr)
-			const expressionResult = await e.evaluate(input)
-			const maybeValidExpression = validateExpressionSelection(expressionResult)
-			if ('errors' in maybeValidExpression) {
-				console.error(maybeValidExpression.errors)
+
+			const findBlock = codeBlockFromMarkdown(markdown)
+			const matchExpression = findBlock('jsonata', 'Match Expression')
+			const transformExpression = findBlock('jsonata', 'Transform Expression')
+			const inputExample = JSON.parse(findBlock('json', 'Input Example'))
+			const resultExample = JSON.parse(findBlock('json', 'Result Example'))
+
+			const selectResult = await jsonata(matchExpression).evaluate(inputExample)
+			if (selectResult !== true) {
 				throw new Error(
-					`The JSONata expression must have a boolean 'select' property.`,
+					`The select expression did not evaluate to true with the given example.`,
 				)
 			}
+			console.log(
+				' ',
+				chalk.green('✔'),
+				chalk.gray('Select expression evaluated to true for the example input'),
+			)
 
-			const maybeValidSenML = validateSenML(expressionResult.result)
+			const transformResult =
+				await jsonata(transformExpression).evaluate(inputExample)
+			const maybeValidSenML = validateSenML(transformResult)
 			if ('errors' in maybeValidSenML) {
 				console.error(maybeValidSenML.errors)
 				throw new Error('The JSONata expression must produce valid SenML')
 			}
-			assert.deepEqual(maybeValidSenML.value, result)
+			assert.deepEqual(maybeValidSenML.value, resultExample)
 			console.log(
 				' ',
 				chalk.green('✔'),
 				chalk.gray('Transformation result is valid SenML'),
 			)
+
+			assert.deepEqual(transformResult, resultExample)
+			console.log(
+				' ',
+				chalk.green('✔'),
+				chalk.gray('The transformation result matches the example'),
+			)
+
 			senMLtoLwM2M(maybeValidSenML.value)
 			// FIXME: validate LwM2M (see #)
 		}
